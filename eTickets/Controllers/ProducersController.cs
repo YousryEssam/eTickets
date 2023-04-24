@@ -1,13 +1,8 @@
-﻿using eTickets.Data;
-using eTickets.Data.Services;
+﻿using eTickets.Data.Services;
 using eTickets.Data.Static;
 using eTickets.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace eTickets.Controllers
@@ -45,7 +40,7 @@ namespace eTickets.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([Bind("ProfilePictureURL,FullName,Bio")]Producer producer)
+        public async Task<IActionResult> Create([Bind("ProfilePictureURL,FullName,Bio")] Producer producer)
         {
             if (!ModelState.IsValid) return View(producer);
 
@@ -66,7 +61,7 @@ namespace eTickets.Controllers
         {
             if (!ModelState.IsValid) return View(producer);
 
-            if(id == producer.Id)
+            if (id == producer.Id)
             {
                 await _service.UpdateAsync(id, producer);
                 return RedirectToAction(nameof(Index));
