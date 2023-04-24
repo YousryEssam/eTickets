@@ -1,9 +1,13 @@
-﻿using eTickets.Models;
-using eTickets.Data.Static;
-using System.Threading.Tasks;
+﻿using eTickets.Data;
 using eTickets.Data.Services;
-using Microsoft.AspNetCore.Mvc;
+using eTickets.Data.Static;
+using eTickets.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace eTickets.Controllers
 {
