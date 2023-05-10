@@ -1,8 +1,14 @@
-﻿using eTickets.Data.Services;
+﻿using eTickets.Data;
+using eTickets.Data.Services;
 using eTickets.Data.Static;
 using eTickets.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace eTickets.Controllers
@@ -10,11 +16,16 @@ namespace eTickets.Controllers
     [Authorize(Roles = UserRoles.Admin)]
     public class ActorsController : Controller
     {
+        private readonly AppDbContext _context;
         private readonly IActorsService _service;
+        private readonly IWebHostEnvironment _environment;
 
-        public ActorsController(IActorsService service)
+
+        public ActorsController(AppDbContext context,IActorsService service,IWebHostEnvironment environment)
         {
+            _context = context;
             _service = service;
+            _environment = environment;
         }
 
         [AllowAnonymous]
@@ -31,14 +42,37 @@ namespace eTickets.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([Bind("FullName,ProfilePictureURL,Bio")] Actor actor)
+        public async Task<IActionResult> Create([Bind("FullName,Bio")] Actor actor,IFormFile img_file)
         {
-            if (!ModelState.IsValid)
+            string path = Path.Combine(_environment.WebRootPath, "Img"); // wwwroot/Img/
+            if (!Directory.Exists(path))
             {
-                return View(actor);
+                Directory.CreateDirectory(path);
             }
-            await _service.AddAsync(actor);
-            return RedirectToAction(nameof(Index));
+            if (img_file != null)
+            {
+                path = Path.Combine(path, img_file.FileName); // for exmple : /Img/Photoname.png
+                using (var stream = new FileStream(path, FileMode.Create))
+                {
+                    await img_file.CopyToAsync(stream);
+                    //ViewBag.Message = string.Format("<b>{0}</b> uploaded.</br>", img_file.FileName.ToString());
+                    actor.ProfilePictureURL = img_file.FileName;
+                }
+            }
+            else
+            {
+                actor.ProfilePictureURL = "asd.jpg";
+            }
+            try
+            {
+                _context.Add(actor);
+                _context.SaveChanges();
+                return RedirectToAction("Index");
+            }
+            catch (Exception ex) { ViewBag.exc = ex.Message; }
+
+
+            return View();
         }
 
         //Get: Actors/Details/1
